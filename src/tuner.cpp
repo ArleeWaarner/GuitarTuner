@@ -230,7 +230,7 @@ int analyzing() {
 
     int paddedNumSamples = result.size();
 
-    //Low-pass filter with fc = 1500 Hz
+    //Low-pass filter with custom cutoff frequency
     int fc = static_cast<int>(cutoff);
     for (int i = 0; i < paddedNumSamples; i++) {
         if(i*(samplingRate/paddedNumSamples)>fc) {
@@ -242,9 +242,6 @@ int analyzing() {
     double freqMax=0.0;
     double max=0.0;
     for (auto& value : result) {
-        if(k*(samplingRate/paddedNumSamples)<1600){
-            //cerr << "fk = " << k*(samplingRate/paddedNumSamples) << "          Amplitude = "<< std::abs(value) << " " << "k = " << k <<"\n";
-        }
         if(max<std::abs(value)) {
             max = std::abs(value);
             freqMax = k*(samplingRate/paddedNumSamples);
@@ -413,7 +410,6 @@ int readInputFile(vector<complex<double>>& input) {
     while (std::getline(file, line)) {
         // Process the line here
         double line_double = std::stod(line);
-        //std::cout << line_double << "               k = " << k << std::endl; // Or do whatever you need with the line      
         input.push_back(line_double);
         k++;
     }
@@ -426,7 +422,6 @@ int generateSpectrum(vector<complex<double>> result) {
 
 
    int POINTS_COUNT = result.size();
-   //cout << "POINTS_COUNT = " << POINTS_COUNT << endl;
 
     // Create the window
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Graph Drawing");
@@ -445,7 +440,6 @@ int generateSpectrum(vector<complex<double>> result) {
 
     // Generate the points for the graph
     for (int i = 0; i < POINTS_COUNT; ++i) {
-        //cout << "result[" << i << "] = " << result[i] << endl;
         float x = 50+(static_cast<float>(i)* (WINDOW_WIDTH))/ POINTS_COUNT;
         float y = 700 + GRAPH_AMPLITUDE * (-std::abs(result[i])); 
         points.emplace_back(sf::Vector2f(x, y), sf::Color::Blue);
