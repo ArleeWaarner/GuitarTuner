@@ -268,6 +268,15 @@ int analyzing() {
         generateSpectrum(result);
     }
 
+    if (remove("input.txt") == 0) {
+        cerr << "Failed to delete the input file" << endl;
+    }
+
+
+    if (remove("output.txt") == 0) {
+        cerr << "Failed to delete the output file" << endl;
+    }
+
 
     return 0;
 }
