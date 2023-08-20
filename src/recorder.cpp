@@ -7,20 +7,29 @@
 #include <fstream>
 #include <map>
 
+using namespace std;
+
+// Sample rates (must respect Nyquist–Shannon sampling theorem)
 const int INPUT_SAMPLE_RATE = 30000 ;
-const int OUTPUT_SAMPLE_RATE = 30000 ;         // 30000 captures per second (1 frame) (30 kHz)
-const int INPUT_FRAMES_PER_BUFFER = 4096;     // 4096 frames in 1 buffer
+const int OUTPUT_SAMPLE_RATE = 30000 ;       
+
+// 4096 samples per buffers  
+const int INPUT_FRAMES_PER_BUFFER = 4096;     
 const int OUTPUT_FRAMES_PER_BUFFER = 4096;     
 
-int INPUT_WAIT = 5;                            // Default recording duration 
+// Signal input and output duration (in seconds)
+int INPUT_WAIT = 5;                            
 int* OUTPUT_WAIT = &INPUT_WAIT;                    
 
+// recorded signal, to be outputted 
 float* recorded;
-int nb_call=-1;
-std::ofstream inputFile;
-std::ofstream outputFile;
 
-using namespace std;
+// Number of calls of each callback functions
+int nb_call=-1;
+
+// streams for input and output files
+ofstream inputFile;
+ofstream outputFile;
 
 // Returns the max out of a and b 
 static float inline maxi(float a, float b){
@@ -290,11 +299,6 @@ int main()
 
     if (remove("inputRecorder.txt") != 0) {
         cerr << "Failed to delete the input file" << endl;
-    }
-
-
-    if (remove("outputRecorder.txt") != 0) {
-        cerr << "Failed to delete the output file" << endl;
     }
 
 

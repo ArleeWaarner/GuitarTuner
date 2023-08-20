@@ -7,11 +7,12 @@
 #include <SFML/Window.hpp>
 #include <string>
 
+using namespace std;
+
+// Dimensions for displaying the frequency spectrum
 const int WINDOW_WIDTH = 26400;
 const int WINDOW_HEIGHT = 1080;
 const float GRAPH_AMPLITUDE = 1.0f;
-
-using namespace std;
 
 int generateSpectrum(vector<complex<double>> result);
 
@@ -62,18 +63,15 @@ vector<complex<double>> computeFFT(const vector<complex<double>>& input) {
 }
 
 int readInputFile(vector<complex<double>>& input) {
-    ifstream file("input.txt");
+    ifstream file("outputRecorder.txt");
     if (!file.is_open()) {
         cerr << "Error opening file." << endl;
         return 1;
     }
     string line;
-    int k=1;
     while (getline(file, line)) {
-        // Process the line here
         double line_double = stod(line);
         input.push_back(line_double);
-        k++;
     }
 
     file.close();
@@ -82,7 +80,8 @@ int readInputFile(vector<complex<double>>& input) {
 
 int main() {
 
-    const double samplingRate = 30000.0; // Samples per second
+    // Samples per second
+    const double samplingRate = 30000.0; 
 
     vector<complex<double>> input;
 
@@ -94,13 +93,11 @@ int main() {
 
     int paddedNumSamples = result.size();
 
+    // Outputs the frequency of the maximum amplitude
     int k=1;
     double freqMax=0.0;
     double max=0.0;
     for (auto& value : result) {
-        if(k*(samplingRate/paddedNumSamples)<1600){
-            //cout << "fk = " << k*(samplingRate/paddedNumSamples) << "          Amplitude = "<< abs(value) << " " << "k = " << k <<"\n";
-        }
         if(max<abs(value)) {
             max = abs(value);
             freqMax = k*(samplingRate/paddedNumSamples);
@@ -110,13 +107,14 @@ int main() {
 
     cout << "freqMax = " << freqMax << " Hz" <<endl;
 
+    // Displays frequency spectrum
     generateSpectrum(result);
 
     return 0;
 }
 
-int generateSpectrum(vector<complex<double>> result) {
 
+int generateSpectrum(vector<complex<double>> result) {
 
    int POINTS_COUNT = result.size();
     // Create the window

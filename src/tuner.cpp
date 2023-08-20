@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
                         tuneRange = stoi(argv[i+1]);
                         cout << "Precision set to " << tuneRange << " cents"<< endl;
                     }
-                    catch (const std::exception&) {
+                    catch (const exception&) {
                         cout << "Wrong precision value entered" << endl;
                         return 1;
                     }
@@ -41,32 +41,36 @@ int main(int argc, char* argv[]){
         cout << "No precision value set, default precision : " << tuneRange << " cents" << endl;
     }
 
-    std::string userInput="";  
-    std::string currentString="";  
+    string userInput="";  
+    string currentString="";  
 
     while(true){
-
         if(currentString=="") {
-            cerr << "What string do you want to tune ? ('E2', 'A2', 'D3', 'G3', 'B3', 'E4')" <<endl;      
-            std::cin >> std::ws;
-            std::getline(std::cin, userInput);
+            cout << "What string do you want to tune ? ('E2', 'A2', 'D3', 'G3', 'B3', 'E4')" <<endl;      
+            cin >> ws;
+            getline(cin, userInput);
             currentString = userInput;
         }
 
+        // Launching the record
         int res1 = recording(currentString);
+
+        // Analyzing the recorded signal
         if(res1>0) {
             analyzing();
         }
 
-        cerr << "What string do you want to tune ? ('E2', 'A2', 'D3', 'G3', 'B3', 'E4')" <<endl;
-        cerr << "Press spacebar to keep tuning the same string" << endl;   
+        cout << "What string do you want to tune ? ('E2', 'A2', 'D3', 'G3', 'B3', 'E4')" <<endl;
+        cout << "Press spacebar to keep tuning the same string" << endl;   
+        
+        // check is space bar is pressed to keep tuning the same string
         while (true) {
             if (isSpacePressed()) {
-                cerr << "Continuing to tune the same string" << std::endl;
+                cout << "Continuing to tune the same string" << endl;
                 break; // Exit the loop when space is detected
             }
             else {
-                cerr << "Changing string to tune" << std::endl;
+                cout << "Changing string to tune" << endl;
                 currentString="";
                 break;
             }
@@ -77,40 +81,40 @@ int main(int argc, char* argv[]){
 }
 
 
-int recording(std::string currentString) {
+int recording(string currentString) {
 
-    cerr << "Guitar tuner starting..." << std::endl;
+    cout << "Guitar tuner starting..." << endl;
 
     // Creating map to link notes and frequencies
-    std::map<std::string, float> stringsFreq;
-    stringsFreq.insert(std::pair<std::string, float>("E2", 82.41));
-    stringsFreq.insert(std::pair<std::string, float>("A2", 110.0));
-    stringsFreq.insert(std::pair<std::string, float>("D3", 146.83));
-    stringsFreq.insert(std::pair<std::string, float>("G3", 196.0));
-    stringsFreq.insert(std::pair<std::string, float>("B3", 246.94));
-    stringsFreq.insert(std::pair<std::string, float>("E4", 329.63));
+    map<string, float> stringsFreq;
+    stringsFreq.insert(pair<string, float>("E2", 82.41));
+    stringsFreq.insert(pair<string, float>("A2", 110.0));
+    stringsFreq.insert(pair<string, float>("D3", 146.83));
+    stringsFreq.insert(pair<string, float>("G3", 196.0));
+    stringsFreq.insert(pair<string, float>("B3", 246.94));
+    stringsFreq.insert(pair<string, float>("E4", 329.63));
 
     // Creating map to link notes and cutoff frequencies for low-pass filter
-    std::map<std::string, float> cutoffFreq;
-    cutoffFreq.insert(std::pair<std::string, float>("E2", 100.0));
-    cutoffFreq.insert(std::pair<std::string, float>("A2", 150.0));
-    cutoffFreq.insert(std::pair<std::string, float>("D3", 171.0));
-    cutoffFreq.insert(std::pair<std::string, float>("G3", 225.0));
-    cutoffFreq.insert(std::pair<std::string, float>("B3", 285.0));
-    cutoffFreq.insert(std::pair<std::string, float>("E4", 400.0));
+    map<string, float> cutoffFreq;
+    cutoffFreq.insert(pair<string, float>("E2", 100.0));
+    cutoffFreq.insert(pair<string, float>("A2", 150.0));
+    cutoffFreq.insert(pair<string, float>("D3", 171.0));
+    cutoffFreq.insert(pair<string, float>("G3", 225.0));
+    cutoffFreq.insert(pair<string, float>("B3", 285.0));
+    cutoffFreq.insert(pair<string, float>("E4", 400.0));
 
-    std::cout << "Tuner set for string : " << currentString << std::endl;
+    cout << "Tuner set for string : " << currentString << endl;
 
     stringFreq = stringsFreq[currentString];
     cutoff = cutoffFreq[currentString];
 
     if(stringFreq>0){
-        std::cout << "Tuner set to tune string at : " << stringFreq << " Hz" << std::endl;
-        std::cout << "The low-pass filter will cut off at : " << cutoff << " Hz" << std::endl;
+        cout << "Tuner set to tune string at : " << stringFreq << " Hz" << endl;
+        cout << "The low-pass filter will cut off at : " << cutoff << " Hz" << endl;
     }
 
     else {
-        std::cerr << "Error : no such string to be set : " << currentString << std::endl;
+        cerr << "Error : no such string to be set : " << currentString << endl;
         return -1;
     }
 
@@ -119,7 +123,7 @@ int recording(std::string currentString) {
 
     // Check if the file is opened successfully
     if (!inputFile.is_open()) {
-        std::cout << "Failed to open the input file." << std::endl;
+        cout << "Failed to open the input file." << endl;
         return -1;
     }
 
@@ -129,24 +133,25 @@ int recording(std::string currentString) {
     inputErr = Pa_Initialize();
     if (inputErr != paNoError)
     {
-        std::cerr << "PortAudio initialization failed: " << Pa_GetErrorText(inputErr) << std::endl;
+        cerr << "PortAudio initialization failed: " << Pa_GetErrorText(inputErr) << endl;
         return -1;
     }
 
     int nb_device = Pa_GetDeviceCount();
 
     if(nb_device<0){
-        std::cerr << "Error getting devices count" << std::endl;
+        cerr << "Error getting devices count" << endl;
         return -1;
     }
     else if(nb_device==0) {
-        std::cerr << "There is no available device on this machine" << std::endl;
+        cerr << "There is no available device on this machine" << endl;
         return -1;
     }
 
     int device_input = 0;
     int device_output = 1;
 
+    // Defining the input parameter of the system
     PaStreamParameters inputParameters;
 
     memset(&inputParameters, 0, sizeof(inputParameters));
@@ -156,6 +161,9 @@ int recording(std::string currentString) {
     inputParameters.sampleFormat = paFloat32;
     inputParameters.suggestedLatency = Pa_GetDeviceInfo(device_input)->defaultLowInputLatency;
 
+    // Save the current buffer of cout
+    streambuf* coutBuffer = cout.rdbuf();
+
     // I N P U T
     // Open a PortAudio stream with input
     PaStream *InputStream;
@@ -164,7 +172,7 @@ int recording(std::string currentString) {
 
     if (inputErr != paNoError)
     {
-        std::cerr << "PortAudio stream opening failed: " << Pa_GetErrorText(inputErr) << std::endl;
+        cerr << "PortAudio stream opening failed: " << Pa_GetErrorText(inputErr) << endl;
         Pa_Terminate();
         return -1;
     }
@@ -173,7 +181,7 @@ int recording(std::string currentString) {
     inputErr = Pa_StartStream(InputStream);
     if (inputErr != paNoError)
     {
-        std::cerr << "PortAudio stream starting failed: " << Pa_GetErrorText(inputErr) << std::endl;
+        cerr << "PortAudio stream starting failed: " << Pa_GetErrorText(inputErr) << endl;
         Pa_CloseStream(InputStream);
         Pa_Terminate();
         return -1;
@@ -185,7 +193,7 @@ int recording(std::string currentString) {
     inputErr = Pa_StopStream(InputStream);
     if (inputErr != paNoError)
     {
-        std::cerr << "PortAudio stream stopping failed: " << Pa_GetErrorText(inputErr) << std::endl;
+        cerr << "PortAudio stream stopping failed: " << Pa_GetErrorText(inputErr) << endl;
     }
 
     inputFile.close();
@@ -193,22 +201,26 @@ int recording(std::string currentString) {
     inputErr = Pa_CloseStream(InputStream);
     if (inputErr != paNoError)
     {
-        std::cerr << "PortAudio stream closing failed: " << Pa_GetErrorText(inputErr) << std::endl;
+        cerr << "PortAudio stream closing failed: " << Pa_GetErrorText(inputErr) << endl;
     }
 
     // Terminate PortAudio
     inputErr = Pa_Terminate();
     if (inputErr != paNoError)
     {
-        std::cerr << "PortAudio termination failed: " << Pa_GetErrorText(inputErr) << std::endl;
+        cerr << "PortAudio termination failed: " << Pa_GetErrorText(inputErr) << endl;
         return -1;
     }
+
+    // Restore the original cout buffer
+    cout.rdbuf(coutBuffer);
 
     return 1;
 }
 
 
 int analyzing() {
+    cout << "\n" << endl;
     cout << "FFT result:" << endl;
     const double samplingRate = static_cast<double>(INPUT_SAMPLE_RATE); // Samples per second
 
@@ -228,30 +240,32 @@ int analyzing() {
         }
     }
 
+    // Outputs the frequency of the maximum amplitude
     int k=1;
     double freqMax=0.0;
     double max=0.0;
     for (auto& value : result) {
-        if(max<std::abs(value)) {
-            max = std::abs(value);
+        if(max<abs(value)) {
+            max = abs(value);
             freqMax = k*(samplingRate/paddedNumSamples);
         }
         k++;;
     }
 
-    cerr << "\n" << "freqMax = " << freqMax << " Hz" <<endl;
+    // Printing out the result of the frequency analysis
+    cout << "\n" << "freqMax = " << freqMax << " Hz" <<endl;
 
     double nbCents = 1200 * log2(freqMax / stringFreq);
 
     if(nbCents<tuneRange && nbCents>-tuneRange){
-        cerr << "The string is tuned !" <<endl;
+        cout << "The string is tuned !" <<endl;
     }
     else if(nbCents>0) {
-        cerr << "You are sharp by " << nbCents << " cents !" <<endl;
+        cout << "You are sharp by " << nbCents << " cents !" <<endl;
 
     }
     else if(nbCents<0) {
-        cerr << "You are flat by " << nbCents << " cents !" <<endl;
+        cout << "You are flat by " << nbCents << " cents !" <<endl;
     } 
 
     if(fftFlag>0) {
@@ -265,10 +279,12 @@ int analyzing() {
     return 0;
 }
 
+// Returns the max out of a and b 
 static float inline maxi(float a, float b){
     return a > b ? a : b;
 }
 
+// Returns the absolute value of float a 
 static float inline abso(float a){
     return a > 0 ? a : -a;
 }
@@ -282,7 +298,6 @@ int audioInputCallback(const void *inputBuffer, void *outputBuffer,
     float a[2], b[3], mem1[4], mem2[4];
     mem1[0] = 0; mem1[1] = 0; mem1[2] = 0; mem1[3] = 0;
     mem2[0] = 0; mem2[1] = 0; mem2[2] = 0; mem2[3] = 0;
-    nb_call++;
     
     // Cast the input buffer to floating-point format
     in = const_cast<float*>(static_cast<const float*>(inputBuffer)); 
@@ -293,10 +308,10 @@ int audioInputCallback(const void *inputBuffer, void *outputBuffer,
     float vol_l = 0;
     float vol_r = 0;
 
-    std::cout.rdbuf(inputFile.rdbuf());
+    cout.rdbuf(inputFile.rdbuf());
 
     for(unsigned long i = 0; i < framesPerBuffer; i++){
-        std::cout << in[i] << std::endl;
+        cout << in[i] << endl;
     }
 
     for(unsigned long i = 0; i < framesPerBuffer; i+=2){
@@ -374,17 +389,15 @@ vector<complex<double>> computeFFT(const vector<complex<double>>& input) {
 
 
 int readInputFile(vector<complex<double>>& input) {
-    std::ifstream file("inputTuner.txt");
+    ifstream file("inputTuner.txt");
     if (!file.is_open()) {
-        std::cerr << "Error opening file." << std::endl;
+        cerr << "Error opening file." << endl;
         return 1;
     }
-    std::string line;
-    int k=1;
-    while (std::getline(file, line)) {
-        double line_double = std::stod(line);
+    string line;
+    while (getline(file, line)) {
+        double line_double = stod(line);
         input.push_back(line_double);
-        k++;
     }
 
     file.close();
@@ -401,21 +414,21 @@ int generateSpectrum(vector<complex<double>> result) {
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Graph Drawing");
 
     // Create a vector to store the points for the graph
-    std::vector<sf::Vertex> points;
+    vector<sf::Vertex> points;
 
     // Load the font
     sf::Font font;
     if (!font.loadFromFile("arial.ttf"))
     {
         // Error handling: Display a message and return
-        std::cout << "Error loading font!" << std::endl;
+        cerr << "Error loading font!" << endl;
         return -1;
     }
 
     // Generate the points for the graph
     for (int i = 0; i < POINTS_COUNT; ++i) {
         float x = 50+(static_cast<float>(i)* (WINDOW_WIDTH))/ POINTS_COUNT;
-        float y = 700 + GRAPH_AMPLITUDE * (-std::abs(result[i])); 
+        float y = 700 + GRAPH_AMPLITUDE * (-abs(result[i])); 
         points.emplace_back(sf::Vector2f(x, y), sf::Color::Blue);
     }
 
@@ -441,7 +454,7 @@ int generateSpectrum(vector<complex<double>> result) {
         x_ticks.append(sf::Vertex(sf::Vector2f(i, 705), sf::Color::Black));
 
         // Add numeric labels
-        sf::Text label(std::to_string(i - 50), font, 12);
+        sf::Text label(to_string(i - 50), font, 12);
         label.setFillColor(sf::Color::Blue);
         label.setPosition(i - 5, 710);
         window.draw(label);
@@ -455,7 +468,7 @@ int generateSpectrum(vector<complex<double>> result) {
         y_ticks.append(sf::Vertex(sf::Vector2f(55, i), sf::Color::Black));
 
         // Add numeric labels
-        sf::Text label(std::to_string(300 - i), font, 12);
+        sf::Text label(to_string(300 - i), font, 12);
         label.setFillColor(sf::Color::Blue);
         label.setPosition(370, i - 5);
         window.draw(label);
@@ -490,7 +503,7 @@ int generateSpectrum(vector<complex<double>> result) {
             x_ticks.append(sf::Vertex(sf::Vector2f(i, 705), sf::Color::Black));
 
             // Add numeric labels
-            sf::Text label(std::to_string((i+k*6) - 50), font, 12);
+            sf::Text label(to_string((i+k*6) - 50), font, 12);
             label.setFillColor(sf::Color::Blue);
             label.setPosition(i - 5, 710);
             window.draw(label);
@@ -505,7 +518,7 @@ int generateSpectrum(vector<complex<double>> result) {
             y_ticks.append(sf::Vertex(sf::Vector2f(725, i), sf::Color::Red));
 
             // Add numeric labels
-            sf::Text label(std::to_string(700 - i), font, 12);
+            sf::Text label(to_string(700 - i), font, 12);
             label.setFillColor(sf::Color::Magenta);
             label.setPosition(17, i-8);
             window.draw(label);
