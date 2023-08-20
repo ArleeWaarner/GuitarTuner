@@ -21,6 +21,7 @@
     #include <termios.h>
 #endif
 
+// Detect if space is pressed
 bool isSpacePressed() {
 #ifdef _WIN32
     return _kbhit() && _getch() == ' ';
@@ -37,26 +38,42 @@ bool isSpacePressed() {
 #endif
 }
 
-const int INPUT_SAMPLE_RATE = 60000 ;
-const int INPUT_FRAMES_PER_BUFFER = 4096;     // 4096 frames in 1 buffer
+using namespace std;
 
-const int INPUT_WAIT = 5; 
+// Sample rate (must respect Nyquist–Shannon sampling theorem)
+const int INPUT_SAMPLE_RATE = 60000 ;
+
+// 4096 samples per buffer
+const int INPUT_FRAMES_PER_BUFFER = 4096;     
+
+// Signal capture duration (in seconds)
+const int INPUT_WAIT = 5;
+
+// Dimensions for displaying the frequency spectrum
 const int WINDOW_WIDTH = 26400;
 const int WINDOW_HEIGHT = 1080;
 const float GRAPH_AMPLITUDE = 1.0f;
+
+// Range (in cents) around the taraget frequency to consicer the string as tuned 
 int tuneRange = 5;
+
+// Flag for fft option
 int fftFlag = 0;
 
-using namespace std;
-
-
+// Input signal
 float* in = new float;
-int nb_call=-1;
-std::ofstream inputFile;
-std::ofstream outputFile;
-float a[2], b[3], mem1[4], mem2[4];
+
+// stream for input file
+ofstream inputFile;
+
+// Target frequency to tune the string
 double stringFreq;
+
+// Cut-off frequency for post acquisition custom low-pass filter
 float cutoff;
+
+// Arrays needed for acquisition low-pass filter
+float a[2], b[3], mem1[4], mem2[4];
 
 // These two functions aims to implement a second order low pass filter (for noise reduction purposes)
 void computeSecondOrderLowPassParameters( float srate, float f, float *a, float *b );
@@ -77,7 +94,7 @@ int generateSpectrum(vector<complex<double>> result);
 
 
 // Handles the recording of the signal 
-int recording(std::string currentString);
+int recording(string currentString);
 
 // Handles the analyze of the recorded signal
 int analyzing();
