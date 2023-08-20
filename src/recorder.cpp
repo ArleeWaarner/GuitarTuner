@@ -15,7 +15,7 @@ const int OUTPUT_FRAMES_PER_BUFFER = 4096;
 int INPUT_WAIT = 5;                            // Default recording duration 
 int* OUTPUT_WAIT = &INPUT_WAIT;                    
 
-float* recorded = nullptr;
+float* recorded;
 int nb_call=-1;
 std::ofstream inputFile;
 std::ofstream outputFile;
@@ -114,9 +114,12 @@ int main()
     // Read the user input from standard input (keyboard) and store it in the variable
     cin >> INPUT_WAIT;
 
+    size_t initialSize = (INPUT_WAIT+1)*INPUT_SAMPLE_RATE;
+    recorded = new float[initialSize];
+
     // Open the input file 
-    // Each sample of the recorded audio will be stored in the file 'input.txt' (Discretization)
-    inputFile.open("input.txt");
+    // Each sample of the recorded audio will be stored in the file 'inputRecorder.txt' (Discretization)
+    inputFile.open("inputRecorder.txt");
 
     // Check if the file is opened successfully
     if (!inputFile.is_open()) {
@@ -125,8 +128,8 @@ int main()
     }
 
     // Open the output file 
-    // Each sample of the played audio will be stored in the file 'output.txt' 
-    outputFile.open("output.txt");
+    // Each sample of the played audio will be stored in the file 'outputRecorder.txt' 
+    outputFile.open("outputRecorder.txt");
 
     // Check if the file is opened successfully
     if (!outputFile.is_open()) {
@@ -284,5 +287,23 @@ int main()
         return 1;
     }
 
+
+    if (remove("inputRecorder.txt") != 0) {
+        cerr << "Failed to delete the input file" << endl;
+    }
+
+
+    if (remove("outputRecorder.txt") != 0) {
+        cerr << "Failed to delete the output file" << endl;
+    }
+
+
     return 0;
 }
+
+
+
+
+
+
+

@@ -84,7 +84,7 @@ int recording(std::string currentString) {
     // Creating map to link notes and frequencies
     std::map<std::string, float> stringsFreq;
     stringsFreq.insert(std::pair<std::string, float>("E2", 82.41));
-    stringsFreq.insert(std::pair<std::string, float>("A2", 110.8));
+    stringsFreq.insert(std::pair<std::string, float>("A2", 110.0));
     stringsFreq.insert(std::pair<std::string, float>("D3", 146.83));
     stringsFreq.insert(std::pair<std::string, float>("G3", 196.0));
     stringsFreq.insert(std::pair<std::string, float>("B3", 246.94));
@@ -115,7 +115,7 @@ int recording(std::string currentString) {
     }
 
     // Open the input file (provide the desired file name)
-    inputFile.open("input.txt");
+    inputFile.open("inputTuner.txt");
 
     // Check if the file is opened successfully
     if (!inputFile.is_open()) {
@@ -123,17 +123,7 @@ int recording(std::string currentString) {
         return -1;
     }
 
-    // Open the output file (provide the desired file name)
-    outputFile.open("output.txt");
-
-    // Check if the file is opened successfully
-    if (!outputFile.is_open()) {
-        std::cout << "Failed to open the output file." << std::endl;
-        return -1;
-    }
-
     PaError inputErr, outputErr;
-    recorded = new float[INPUT_FRAMES_PER_BUFFER];
 
     // Initialize PortAudio
     inputErr = Pa_Initialize();
@@ -268,15 +258,9 @@ int analyzing() {
         generateSpectrum(result);
     }
 
-    if (remove("input.txt") == 0) {
+    if (remove("inputTuner.txt") != 0) {
         cerr << "Failed to delete the input file" << endl;
     }
-
-
-    if (remove("output.txt") == 0) {
-        cerr << "Failed to delete the output file" << endl;
-    }
-
 
     return 0;
 }
@@ -299,10 +283,9 @@ int audioInputCallback(const void *inputBuffer, void *outputBuffer,
     mem1[0] = 0; mem1[1] = 0; mem1[2] = 0; mem1[3] = 0;
     mem2[0] = 0; mem2[1] = 0; mem2[2] = 0; mem2[3] = 0;
     nb_call++;
-    // Cast the input and output buffers to floating-point format
-    float* in = const_cast<float*>(static_cast<const float*>(inputBuffer));
-
-    recorded = in; 
+    
+    // Cast the input buffer to floating-point format
+    in = const_cast<float*>(static_cast<const float*>(inputBuffer)); 
 
     int dipSize = 100;
     printf("\r");
@@ -313,7 +296,6 @@ int audioInputCallback(const void *inputBuffer, void *outputBuffer,
     std::cout.rdbuf(inputFile.rdbuf());
 
     for(unsigned long i = 0; i < framesPerBuffer; i++){
-        recorded[i+nb_call*framesPerBuffer] = in[i];
         std::cout << in[i] << std::endl;
     }
 
@@ -342,25 +324,6 @@ int audioInputCallback(const void *inputBuffer, void *outputBuffer,
     return 0;
 }
 
-
-int audioOutputCallback(const void *inputBuffer, void *outputBuffer,
-                  unsigned long framesPerBuffer,
-                  const PaStreamCallbackTimeInfo *timeInfo,
-                  PaStreamCallbackFlags statusFlags,
-                  void *userData){
-
-    nb_call++;
-    float* out = static_cast<float*>(outputBuffer);
-
-    std::cout.rdbuf(outputFile.rdbuf());
-
-    for(unsigned long i = 0; i < framesPerBuffer; i++){
-        out[i] = recorded[i+nb_call*framesPerBuffer];
-        std::cout << out[i] << std::endl;
-    }
-
-    return paContinue;
-}
 
 // Recursive FFT function
 void fft(vector<complex<double>>& signal) {
@@ -408,8 +371,10 @@ vector<complex<double>> computeFFT(const vector<complex<double>>& input) {
     return signal;
 }
 
+
+
 int readInputFile(vector<complex<double>>& input) {
-    std::ifstream file("input.txt");
+    std::ifstream file("inputTuner.txt");
     if (!file.is_open()) {
         std::cerr << "Error opening file." << std::endl;
         return 1;
@@ -417,7 +382,6 @@ int readInputFile(vector<complex<double>>& input) {
     std::string line;
     int k=1;
     while (std::getline(file, line)) {
-        // Process the line here
         double line_double = std::stod(line);
         input.push_back(line_double);
         k++;
@@ -426,6 +390,7 @@ int readInputFile(vector<complex<double>>& input) {
     file.close();
     return 0;
 }
+
 
 int generateSpectrum(vector<complex<double>> result) {
 
@@ -565,7 +530,6 @@ void computeSecondOrderLowPassParameters( float srate, float f, float *a, float 
    float w0 = 2 * M_PI * f/srate;
    float cosw0 = cos(w0);
    float sinw0 = sin(w0);
-   //float alpha = sinw0/2;
    float alpha = sinw0/2 * sqrt(2);
 
    a0   = 1 + alpha;

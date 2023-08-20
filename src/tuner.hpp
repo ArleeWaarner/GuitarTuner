@@ -50,7 +50,7 @@ int fftFlag = 0;
 using namespace std;
 
 
-float* recorded = nullptr;
+float* in = new float;
 int nb_call=-1;
 std::ofstream inputFile;
 std::ofstream outputFile;
@@ -65,21 +65,21 @@ float processSecondOrderFilter( float x, float *mem, float *a, float *b );
 // Callback function that handles the input signal
 int audioInputCallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData);
 
-// Callback function that handles the output signal (not used in the current version)
-int audioOutputCallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData);
-
 // Process the FFT algorithm on the discrete input signal
 void fft(vector<complex<double>>& signal);
 vector<complex<double>> computeFFT(const vector<complex<double>>& input);
 
+// Reads input file
 int readInputFile(vector<complex<double>>& input);
 
 // Generate the frequency spectrum to 1600 Hz (if -f or --ftt flag added)
 int generateSpectrum(vector<complex<double>> result);
 
 
+// Handles the recording of the signal 
 int recording(std::string currentString);
 
+// Handles the analyze of the recorded signal
 int analyzing();
 
 
